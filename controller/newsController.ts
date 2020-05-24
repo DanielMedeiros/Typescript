@@ -2,51 +2,88 @@ import NewsService from '../services/newsServices';
 import * as HttpStatus from 'http-status';
 import Helper from '../infra/helper';
 
-class NewsControlle{
+import * as redis from "redis";
+ 
 
-    
-
-   get(req,res){
-    NewsService.get()
-    .then(news => Helper.sendResponse(res,HttpStatus.OK,news))
-    .catch(error => console.error.bind(console, `Error ${error}`));
-   }
-
-   getById(req,res){
-    const _id = req.params.id;
-
-    NewsService.getById(_id)
-    .then(news => Helper.sendResponse(res,HttpStatus.OK,news))
-    .catch(error => console.error.bind(console, `Error ${error}`));
-
-   }
-
-   create(req,res){     
-    let vm = req.body;
-
-    NewsService.create(vm)
-    .then(news => Helper.sendResponse(res, HttpStatus.OK,"Noticia criada com sucesso!!"))
-    .catch(error => console.error.bind(console, `Error ${error}`));
-
-   }
-
-   update(req,res){
-    const _id = req.params.id;       
-    let news = req.body;
-
-    NewsService.update(_id, news)
-    .then(news => Helper.sendResponse(res, HttpStatus.OK, "Noticia foi atualizada com sucesso!!"))
-    .catch(error => console.error.bind(console, `Error ${error}`));
-
-   }
-
-   delete(req,res){
-    const _id = req.params.id;
-
-    NewsService.delete(_id)
-    .then(() => Helper.sendResponse(res, HttpStatus.OK, "Noticia deletada com sucesso!"))
-    .catch(error => console.error.bind(console, `Error ${error}`));
-   }
+ 
+class NewsController {
+  async get(req, res) {
+    let client = redis.createClient();
+ 
+    await client.get("news", async function (err, reply) {
+ 
+      try {
+ 
+        if (reply) {
+          console.log("redis");
+          Helper.sendResponse(res, HttpStatus.OK, JSON.parse(reply));
+ 
+        } else {
+          console.log("db");
+ 
+          let response = await NewsService.get();
+ 
+          client.set("news", JSON.stringify(response));
+ 
+          client.expire("news", 20);
+          
+          Helper.sendResponse(res, HttpStatus.OK, response);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+ 
+    });
+  }
+ 
+  async getById(req, res) {
+ 
+    try {
+      const _id = req.params.id;
+      let response = await NewsService.getById(_id);
+      Helper.sendResponse(res, HttpStatus.OK, response);
+ 
+    } catch (error) {
+      console.error(error);
+    }
+ 
+  }
+ 
+  async create(req, res) {
+    try {
+      let vm = req.body;
+      await NewsService.create(vm);
+      Helper.sendResponse(res, HttpStatus.OK, "Noticia cadastrada com sucesso!");
+    } catch (error) {
+      console.error(error);
+    }
+ 
+  }
+ 
+  async update(req, res) {
+    try {
+      const _id = req.params.id;
+      let news = req.body;
+      await NewsService.update(_id, news);
+      Helper.sendResponse(res, HttpStatus.OK, `Noticia atualiza com sucesso!`);
+ 
+    } catch (error) {
+      console.error(error);
+    }
+ 
+  }
+ 
+  async delete(req, res) {
+    try {
+      const _id = req.params.id;
+      await NewsService.delete(_id);
+      Helper.sendResponse(res, HttpStatus.OK, "Noticia deletada com sucesso!");
+ 
+    } catch (error) {
+      console.error(error);
+    }
+ 
+  }
 }
-
-export default new NewsControlle();
+ 
+export default new NewsController();

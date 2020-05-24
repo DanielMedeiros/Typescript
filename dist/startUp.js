@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const db_1 = require("./infra/db");
 const newsController_1 = require("./controller/newsController");
 const auth_1 = require("./infra/auth");
+const upload_1 = require("./infra/upload");
 class startUp {
     /**
      *
@@ -25,6 +26,14 @@ class startUp {
             res.send({
                 versao: '0.0.1'
             });
+        });
+        this.app.route('/uploads').post(upload_1.default.single('file'), (req, res) => {
+            try {
+                res.send('Arquivo enviado com sucesso!!');
+            }
+            catch (error) {
+                console.log(error);
+            }
         });
         this.app.use(auth_1.default.validate);
         //new
