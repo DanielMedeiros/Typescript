@@ -1,7 +1,7 @@
 version: "3"
 services:
-  api_dev:
-    image: dockerlesnar/typescript
+  api:
+    build: .    
     ports:
       - "5000:3050"
     links:

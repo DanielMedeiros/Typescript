@@ -3,6 +3,7 @@ import * as bodyParser from 'body-parser';
 
 import DB from './infra/db';
 import NewsController from './controller/newsController';
+import Auth from './infra/auth';
 
 class startUp{
     public app: express.Application;    
@@ -26,11 +27,14 @@ class startUp{
     }
 
     routes(){
+        
         this.app.route('/').get((req,res)=>{
             res.send({
                 versao: '0.0.1'
             })
         })
+
+        this.app.use(Auth.validate);
 
         //new
         this.app.route('/api/v1/news').get(NewsController.get);
