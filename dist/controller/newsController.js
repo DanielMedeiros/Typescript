@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const newsServices_1 = require("../services/newsServices");
 const HttpStatus = require("http-status");
 const helper_1 = require("../infra/helper");
+const exportFiles_1 = require("../infra/exportFiles");
 const redis = require("redis");
 class NewsController {
     get(req, res) {
@@ -28,7 +29,7 @@ class NewsController {
                             console.log("db");
                             let response = yield newsServices_1.default.get();
                             client.set("news", JSON.stringify(response));
-                            client.expire("news", 20);
+                            client.expire("news", 50);
                             helper_1.default.sendResponse(res, HttpStatus.OK, response);
                         }
                     }
@@ -82,6 +83,18 @@ class NewsController {
                 const _id = req.params.id;
                 yield newsServices_1.default.delete(_id);
                 helper_1.default.sendResponse(res, HttpStatus.OK, "Noticia deletada com sucesso!");
+            }
+            catch (error) {
+                console.error(error);
+            }
+        });
+    }
+    exportToCsv(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let response = yield newsServices_1.default.get();
+                let fileName = yield exportFiles_1.default.tocsv(response);
+                helper_1.default.sendResponse(res, HttpStatus.OK, req.get('host') + "/exports/" + fileName);
             }
             catch (error) {
                 console.error(error);

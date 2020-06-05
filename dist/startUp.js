@@ -2,10 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const bodyParser = require("body-parser");
+const compression = require("compression");
 const db_1 = require("./infra/db");
-const newsController_1 = require("./controller/newsController");
 const auth_1 = require("./infra/auth");
 const upload_1 = require("./infra/upload");
+const newsRouters_1 = require("./router/newsRouters");
 class startUp {
     /**
      *
@@ -20,6 +21,8 @@ class startUp {
     middler() {
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({ extended: false }));
+        this.app.use(compression());
+        this.app.use('/exports', express.static(process.cwd() + '/exports'));
     }
     routes() {
         this.app.route('/').get((req, res) => {
@@ -36,12 +39,7 @@ class startUp {
             }
         });
         this.app.use(auth_1.default.validate);
-        //new
-        this.app.route('/api/v1/news').get(newsController_1.default.get);
-        this.app.route('/api/v1/news/:id').get(newsController_1.default.getById);
-        this.app.route('/api/v1/news').post(newsController_1.default.create);
-        this.app.route('/api/v1/news/:id').put(newsController_1.default.update);
-        this.app.route('/api/v1/news/:id').delete(newsController_1.default.delete);
+        this.app.use('/', newsRouters_1.default);
     }
 }
 exports.default = new startUp();

@@ -1,5 +1,4 @@
 import NewsRepository from '../reposotory/newsRepository';
-import newsRepository from '../reposotory/newsRepository';
 
 class NewsServices{
 
@@ -20,7 +19,7 @@ class NewsServices{
     }
 
     async delete(_id){
-        return await newsRepository.findByIdAndRemove(_id);
+        return await NewsRepository.findByIdAndRemove(_id);
     }
 }
 

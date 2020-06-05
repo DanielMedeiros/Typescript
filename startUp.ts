@@ -1,11 +1,11 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
+import * as compression from 'compression';
 
 import DB from './infra/db';
-import NewsController from './controller/newsController';
 import Auth from './infra/auth';
-import Uplods from './infra/upload';
 import uploads from './infra/upload';
+import newsRouter from './router/newsRouters';
 
 class startUp{
     public app: express.Application;    
@@ -26,6 +26,8 @@ class startUp{
     middler(){
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({extended: false}));
+        this.app.use(compression());
+        this.app.use('/exports', express.static(process.cwd() + '/exports'));
     }
 
     routes(){
@@ -44,15 +46,11 @@ class startUp{
             }
         })
 
+        this.app.use(Auth.validate); 
 
-        this.app.use(Auth.validate);
+        this.app.use('/', newsRouter);
 
-        //new
-        this.app.route('/api/v1/news').get(NewsController.get);
-        this.app.route('/api/v1/news/:id').get(NewsController.getById);
-        this.app.route('/api/v1/news').post(NewsController.create);
-        this.app.route('/api/v1/news/:id').put( NewsController.update);
-        this.app.route('/api/v1/news/:id').delete(NewsController.delete);
+     
     }
 
     

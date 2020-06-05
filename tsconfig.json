@@ -3,6 +3,7 @@
         "target": "es6",
         "module": "commonjs",
         "outDir": "dist",
+        "incremental": true,
         "typeRoots": [
             "../node_modules/@types"
         ],
